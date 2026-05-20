@@ -14,7 +14,7 @@ module ImportMap
     end
 
     # Adds a new pin. Raises `DuplicatePinError` if the specifier already exists and `override` is not set to true.
-    def pin(specifier : String, url : String, preload : Bool = true, override : Bool = false)
+    def pin(specifier : String, to url : String, preload : Bool = true, override : Bool = false)
       if @entries.has_key?(specifier) && !override
         raise DuplicatePinError.new("Specifier #{specifier} already pinned")
       end
@@ -95,7 +95,7 @@ module ImportMap
       entries
     end
 
-    private def each_js_module(dir : String, &block : String, String ->)
+    private def each_js_module(dir : String, & : String, String ->)
       base = Path.new(dir).expand
       base_str = base.to_s
       return unless Dir.exists?(base_str)

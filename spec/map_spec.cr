@@ -17,6 +17,13 @@ describe ImportMap::Map do
     json.should eq({"imports" => {"stimulus" => "js/stimulus.js", "turbo" => "js/turbo.js"}}.to_json)
   end
 
+  it "accepts the `to:` keyword for the url" do
+    map = ImportMap::Map.new
+    map.pin("stimulus", to: "/js/stimulus.js")
+    json = map.to_json_string
+    json.should eq({"imports" => {"stimulus" => "/js/stimulus.js"}}.to_json)
+  end
+
   it "detects duplicate pins" do
     map = ImportMap::Map.new
     map.pin("stimulus", "/js/stimulus.js")

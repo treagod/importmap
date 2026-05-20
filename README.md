@@ -37,7 +37,7 @@ dependencies:
 ```crystal
 require "importmap"
 
-Importmap.draw do
+ImportMap.draw do
   # Base pins (preload = true by default)
   pin "stimulus", "/js/stimulus.js"
 
@@ -50,16 +50,16 @@ end
 2. (Optional) integrate a resolver
 
 ```crystal
-Importmap.resolver = ->(path : String) { "/assets#{path}?v=abc" }
+ImportMap.resolver = ->(path : String) { "/assets#{path}?v=abc" }
 ```
 
 3. Render the tags
 
 ```crystal
-Importmap.tag
+ImportMap.tag
 
 # admin namespace with an custom entrypoint
-Importmap.tag("admin", entrypoint: "admin-ui")
+ImportMap.tag("admin", entrypoint: "admin-ui")
 ```
 
 Result:
