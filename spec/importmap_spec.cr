@@ -32,3 +32,52 @@ describe ImportMap do
     ImportMap.resolver = ->(path : String) { path }
   end
 end
+
+EVIL_URL   = %(/js/x.js"></script><script>alert(1)</script>)
+EVIL_NS    = %(evil" onx="1)
+EVIL_ENTRY = %(</script><img src=x onerror=alert(1)>)
+
+ImportMap.draw do
+  namespace EVIL_NS do
+    pin "evil", to: EVIL_URL
+  end
+end
+
+describe "ImportMap escaping" do
+  describe "html_attr_escape" do
+    it "escapes &, \", < and >" do
+      ImportMap.html_attr_escape!(%(a&b"c<d>e)).should eq(%(a&amp;b&quot;c&lt;d&gt;e))
+    end
+  end
+
+  describe "script_json_escape" do
+    it "escapes < so the value cannot terminate a <script> element" do
+      escaped = ImportMap.script_json_escape!("</script>")
+      escaped.includes?('<').should be_false
+      escaped.should eq("#{92.chr}u003C/script>")
+    end
+  end
+
+  describe "js_string_escape" do
+    it "escapes quotes and control characters" do
+      ImportMap.js_string_escape!(%(a"b)).should eq(%q(a\"b))
+      ImportMap.js_string_escape!("a\nb").should eq(%q(a\nb))
+    end
+  end
+
+  describe "ImportMap.tag" do
+    it "escapes pin URLs, namespace and entrypoint so injected markup cannot break out" do
+      html = ImportMap.tag(EVIL_NS, EVIL_ENTRY)
+
+      # No raw breakout from any injected value.
+      html.includes?(EVIL_URL).should be_false
+      html.includes?(%(<script>alert(1)</script>)).should be_false
+      html.includes?(%(<img src=x onerror=alert(1)>)).should be_false
+
+      # Values survive, but only in escaped form.
+      html.includes?(%(data-namespace="evil&quot; onx=&quot;1")).should be_true
+      html.includes?(%(href="/js/x.js&quot;&gt;&lt;/script&gt;)).should be_true
+      html.includes?("#{92.chr}u003C/script>").should be_true
+    end
+  end
+end

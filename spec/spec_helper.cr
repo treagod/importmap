@@ -9,6 +9,19 @@ module ImportMap
       @entries
     end
   end
+
+  # Public delegators so the private escape helpers can be unit-tested directly.
+  def self.html_attr_escape!(value : String) : String
+    html_attr_escape(value)
+  end
+
+  def self.script_json_escape!(value : String) : String
+    script_json_escape(value)
+  end
+
+  def self.js_string_escape!(value : String) : String
+    js_string_escape(value)
+  end
 end
 
 def with_tmpdir(& : String ->)

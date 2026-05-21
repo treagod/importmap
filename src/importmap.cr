@@ -19,15 +19,40 @@ module ImportMap
     preloads = m.preloads(ns)
 
     String.build do |io|
-      data = ns ? %( data-namespace="#{ns}") : ""
+      data = ns ? %( data-namespace="#{html_attr_escape(ns)}") : ""
 
-      io << %(<script type="importmap"#{data}>#{json}</script>\n)
+      io << %(<script type="importmap"#{data}>#{script_json_escape(json)}</script>\n)
 
       preloads.each do |url|
-        io << %(<link rel="modulepreload" href="#{url}">\n)
+        io << %(<link rel="modulepreload" href="#{html_attr_escape(url)}">\n)
       end
 
-      io << %(<script type="module">import "#{entrypoint}"</script>\n) if entrypoint
+      if entrypoint
+        safe_entrypoint = script_json_escape(js_string_escape(entrypoint))
+        io << %(<script type="module">import "#{safe_entrypoint}"</script>\n)
+      end
     end
+  end
+
+  # Escapes a value for use inside a double-quoted HTML attribute.
+  private def self.html_attr_escape(value : String) : String
+    value
+      .gsub('&', "&amp;")
+      .gsub('"', "&quot;")
+      .gsub('<', "&lt;")
+      .gsub('>', "&gt;")
+  end
+
+  # Escapes `<` so the value cannot terminate or open a tag while sitting inside
+  # a `<script>` raw-text element. `<` is a valid escape in both JSON and JS
+  # string literals, so it round-trips to `<` for the importmap/JS parser while
+  # neutralizing `</script`, `<script` and `<!--` in any casing.
+  private def self.script_json_escape(value : String) : String
+    value.gsub('<', "\\u003C")
+  end
+
+  # Escapes a value for use as the body of a double-quoted JS string literal.
+  private def self.js_string_escape(value : String) : String
+    value.to_json[1...-1]
   end
 end
