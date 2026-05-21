@@ -45,7 +45,7 @@ module ImportMap
     end
 
     def preloads(ns : String? = nil) : Array(String)
-      cached(ns)[1]
+      cached(ns)[1].dup
     end
 
     private def cached(ns : String? = nil) : Tuple(String, Array(String))

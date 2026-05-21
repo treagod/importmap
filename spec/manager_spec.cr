@@ -51,6 +51,17 @@ describe ImportMap::Manager do
     mgr.preloads.empty?.should be_false
   end
 
+  it "returns a copy of preloads so callers cannot mutate the cache" do
+    mgr = ImportMap::Manager.new
+    mgr.pin("stimulus", "/js/stimulus.js")
+
+    leaked = mgr.preloads
+    leaked << "/js/injected.js"
+
+    mgr.preloads.should eq(["/js/stimulus.js"])
+    mgr.preloads.should_not be(leaked)
+  end
+
   it "return an empty preloads array when all pins have preload=false" do
     mgr = ImportMap::Manager.new
     mgr.pin("stimulus", "/js/stimulus.js", preload: false)
