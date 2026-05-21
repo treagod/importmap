@@ -12,6 +12,12 @@ module ImportMap
       @@instance ||= new
     end
 
+    # Replaces the global singleton with a fresh, empty manager and returns it.
+    # Intended for test isolation and dev-time reloading.
+    def self.reset! : Manager
+      @@instance = new
+    end
+
     def resolver=(resolver : Proc(String, String))
       @resolver = resolver
       @cache.clear

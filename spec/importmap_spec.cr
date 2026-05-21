@@ -81,3 +81,18 @@ describe "ImportMap escaping" do
     end
   end
 end
+
+# Must stay the LAST example in this file: it wipes the global singleton, and
+# Crystal runs examples in definition order.
+describe "ImportMap::Manager.reset!" do
+  it "replaces the singleton with a fresh, empty instance" do
+    before = ImportMap::Manager.instance
+    before.pin("reset_probe", to: "/probe.js")
+
+    fresh = ImportMap::Manager.reset!
+
+    fresh.should be(ImportMap::Manager.instance)
+    fresh.should_not be(before)
+    fresh.json.should eq(%({"imports":{}}))
+  end
+end
